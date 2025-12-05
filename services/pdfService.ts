@@ -3,7 +3,7 @@ import { CoverDimensions, CalculatedSpecs, Unit } from '../types';
 
 export const generateCoverPDF = (dimensions: CoverDimensions, specs: CalculatedSpecs) => {
   const { unit, turnIn, hingeGap, spineWidth, boardWidth, boardHeight, bleed } = dimensions;
-  
+
   // Calculate final PDF page size (Trim Size + Bleed * 2)
   const pageWidth = specs.totalWidth + (bleed * 2);
   const pageHeight = specs.totalHeight + (bleed * 2);
@@ -12,7 +12,7 @@ export const generateCoverPDF = (dimensions: CoverDimensions, specs: CalculatedS
   const doc = new jsPDF({
     orientation: pageWidth > pageHeight ? 'landscape' : 'portrait',
     unit: dimensions.unit,
-    format: [pageWidth, pageHeight] 
+    format: [pageWidth, pageHeight]
   });
 
   // Base configuration
@@ -29,7 +29,7 @@ export const generateCoverPDF = (dimensions: CoverDimensions, specs: CalculatedS
   const tY = (y: number) => originY + y;
 
   // Draw Cut Line (Solid Black) - representing the Trim Box
-  doc.setDrawColor(0, 0, 0); 
+  doc.setDrawColor(0, 0, 0);
   doc.rect(tX(0), tY(0), specs.totalWidth, specs.totalHeight);
 
   // Helper to draw a guide line (Cyan dashed)
@@ -50,14 +50,14 @@ export const generateCoverPDF = (dimensions: CoverDimensions, specs: CalculatedS
 
   // Helper to draw Registration Mark (Small Circle with crosshair)
   const drawRegMark = (cx: number, cy: number) => {
-    const r = unit === Unit.MM ? 1.0 : 0.04; 
+    const r = unit === Unit.MM ? 1.0 : 0.04;
     const l = unit === Unit.MM ? 2.5 : 0.1;
     doc.setDrawColor(0, 0, 0);
     doc.setLineWidth(unit === Unit.MM ? 0.05 : 0.002);
-    
+
     // Circle
     doc.circle(cx, cy, r);
-    
+
     // Crosshair
     doc.line(cx - l, cy, cx + l, cy);
     doc.line(cx, cy - l, cx, cy + l);
@@ -65,7 +65,7 @@ export const generateCoverPDF = (dimensions: CoverDimensions, specs: CalculatedS
 
   // Helper to draw Tick Mark in Bleed
   const drawBleedTick = (x: number) => {
-    const tickLen = bleed * 0.8; 
+    const tickLen = bleed * 0.8;
     doc.setDrawColor(0, 0, 0);
     doc.setLineWidth(unit === Unit.MM ? 0.1 : 0.005);
     doc.line(tX(x), 0, tX(x), tickLen);
@@ -80,26 +80,26 @@ export const generateCoverPDF = (dimensions: CoverDimensions, specs: CalculatedS
 
   // 2. Vertical Sections & Fold Lines
   const backBoardX = turnIn;
-  drawGuideLine(backBoardX, turnIn, backBoardX, specs.totalHeight - turnIn); 
+  drawGuideLine(backBoardX, turnIn, backBoardX, specs.totalHeight - turnIn);
 
   const hinge1X = backBoardX + boardWidth;
-  drawGuideLine(hinge1X, turnIn, hinge1X, specs.totalHeight - turnIn); 
-  drawFoldLine(hinge1X); 
+  drawGuideLine(hinge1X, turnIn, hinge1X, specs.totalHeight - turnIn);
+  drawFoldLine(hinge1X);
 
   const spineX = hinge1X + hingeGap;
-  drawGuideLine(spineX, turnIn, spineX, specs.totalHeight - turnIn); 
-  drawFoldLine(spineX); 
+  drawGuideLine(spineX, turnIn, spineX, specs.totalHeight - turnIn);
+  drawFoldLine(spineX);
 
   const hinge2X = spineX + spineWidth;
-  drawGuideLine(hinge2X, turnIn, hinge2X, specs.totalHeight - turnIn); 
-  drawFoldLine(hinge2X); 
+  drawGuideLine(hinge2X, turnIn, hinge2X, specs.totalHeight - turnIn);
+  drawFoldLine(hinge2X);
 
   const frontBoardX = hinge2X + hingeGap;
-  drawGuideLine(frontBoardX, turnIn, frontBoardX, specs.totalHeight - turnIn); 
-  drawFoldLine(frontBoardX); 
+  drawGuideLine(frontBoardX, turnIn, frontBoardX, specs.totalHeight - turnIn);
+  drawFoldLine(frontBoardX);
 
   const rightTurnInX = frontBoardX + boardWidth;
-  drawGuideLine(rightTurnInX, turnIn, rightTurnInX, specs.totalHeight - turnIn); 
+  drawGuideLine(rightTurnInX, turnIn, rightTurnInX, specs.totalHeight - turnIn);
 
   // 3. Bleed Elements
   if (bleed > 0) {
@@ -110,26 +110,26 @@ export const generateCoverPDF = (dimensions: CoverDimensions, specs: CalculatedS
     drawRegMark(tX(specs.totalWidth / 2), tY(specs.totalHeight) + (bleed / 2));
 
     // B. Crop Marks (At the corners)
-    const cmLen = unit === Unit.MM ? 3 : 0.125; 
-    const offset = unit === Unit.MM ? 1 : 0.04; 
-    doc.setDrawColor(0,0,0);
+    const cmLen = unit === Unit.MM ? 3 : 0.125;
+    const offset = unit === Unit.MM ? 1 : 0.04;
+    doc.setDrawColor(0, 0, 0);
     doc.setLineWidth(unit === Unit.MM ? 0.1 : 0.005);
-    
+
     // Top Left
-    doc.line(tX(0) - offset - cmLen, tY(0), tX(0) - offset, tY(0)); 
-    doc.line(tX(0), tY(0) - offset - cmLen, tX(0), tY(0) - offset); 
+    doc.line(tX(0) - offset - cmLen, tY(0), tX(0) - offset, tY(0));
+    doc.line(tX(0), tY(0) - offset - cmLen, tX(0), tY(0) - offset);
 
     // Top Right
-    doc.line(tX(specs.totalWidth) + offset, tY(0), tX(specs.totalWidth) + offset + cmLen, tY(0)); 
-    doc.line(tX(specs.totalWidth), tY(0) - offset - cmLen, tX(specs.totalWidth), tY(0) - offset); 
-    
+    doc.line(tX(specs.totalWidth) + offset, tY(0), tX(specs.totalWidth) + offset + cmLen, tY(0));
+    doc.line(tX(specs.totalWidth), tY(0) - offset - cmLen, tX(specs.totalWidth), tY(0) - offset);
+
     // Bottom Left
-    doc.line(tX(0) - offset - cmLen, tY(specs.totalHeight), tX(0) - offset, tY(specs.totalHeight)); 
-    doc.line(tX(0), tY(specs.totalHeight) + offset, tX(0), tY(specs.totalHeight) + offset + cmLen); 
+    doc.line(tX(0) - offset - cmLen, tY(specs.totalHeight), tX(0) - offset, tY(specs.totalHeight));
+    doc.line(tX(0), tY(specs.totalHeight) + offset, tX(0), tY(specs.totalHeight) + offset + cmLen);
 
     // Bottom Right
-    doc.line(tX(specs.totalWidth) + offset, tY(specs.totalHeight), tX(specs.totalWidth) + offset + cmLen, tY(specs.totalHeight)); 
-    doc.line(tX(specs.totalWidth), tY(specs.totalHeight) + offset, tX(specs.totalWidth), tY(specs.totalHeight) + offset + cmLen); 
+    doc.line(tX(specs.totalWidth) + offset, tY(specs.totalHeight), tX(specs.totalWidth) + offset + cmLen, tY(specs.totalHeight));
+    doc.line(tX(specs.totalWidth), tY(specs.totalHeight) + offset, tX(specs.totalWidth), tY(specs.totalHeight) + offset + cmLen);
 
     // C. Spine & Hinge Guide Ticks
     drawBleedTick(hinge1X);
@@ -161,7 +161,7 @@ export const generateBlueprintPDF = (dimensions: CoverDimensions, specs: Calcula
   // Fonts
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
-  doc.text("BindMaster Pro - Prepress Blueprint", 10, 15);
+  doc.text("TM BindMaster 3D - Prepress Blueprint", 10, 15);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
@@ -181,15 +181,15 @@ export const generateBlueprintPDF = (dimensions: CoverDimensions, specs: Calcula
   doc.text(`Bleed:       ${dimensions.bleed} ${unit}`, 10, startY + lineHeight * 7);
 
   // --- Drawing the Schematic (Right Side / Center) ---
-  const drawAreaX = 80;
+  const drawAreaX = 90; // Shifted right to avoid overlap
   const drawAreaY = 40;
-  const drawAreaW = 190; // Reduced slightly to make room for right side dims
+  const drawAreaW = 180; // Reduced width slightly
   const drawAreaH = 130;
 
   // Calculate Scale to fit
   const scaleX = drawAreaW / specs.totalWidth;
   const scaleY = drawAreaH / specs.totalHeight;
-  const scale = Math.min(scaleX, scaleY); 
+  const scale = Math.min(scaleX, scaleY);
 
   // Centering offsets
   const scaledW = specs.totalWidth * scale;
@@ -228,16 +228,19 @@ export const generateBlueprintPDF = (dimensions: CoverDimensions, specs: Calcula
   doc.line(tx(x5), ty(0), tx(x5), ty(specs.totalHeight)); // Hinge line
   doc.line(tx(x6), ty(turnIn), tx(x6), ty(specs.totalHeight - turnIn));
 
-  doc.setLineDashPattern([], 0); 
-  
+  doc.setLineDashPattern([], 0);
+
   // Board Labels (Top area)
   doc.setFontSize(8);
   doc.setTextColor(150, 150, 150);
   const labelY = turnIn + (boardHeight * 0.2);
-  
-  doc.text("BACK", tx(turnIn + boardWidth/2), ty(labelY), { align: 'center' });
-  doc.text("FRONT", tx(specs.frontBoardStart + boardWidth/2), ty(labelY), { align: 'center' });
-  doc.text("SPINE", tx(specs.spineStart + spineWidth/2), ty(labelY), { align: 'center', angle: 90 });
+  const spineLabelY = specs.totalHeight / 2; // Centered vertically
+
+  doc.text("BACK", tx(turnIn + boardWidth / 2), ty(labelY), { align: 'center' });
+  doc.text("FRONT", tx(specs.frontBoardStart + boardWidth / 2), ty(labelY), { align: 'center' });
+  // Manual offset to center text roughly (font size 8pt ~= 2.8mm height. Half ~= 1.4mm)
+  // Shift right (+X) to center on the vertical spine line
+  doc.text("SPINE", tx(specs.spineStart + spineWidth / 2) + 5.0, ty(spineLabelY), { align: 'center', angle: 90 });
 
 
   // --- Dimension Lines & Labels ---
@@ -247,19 +250,19 @@ export const generateBlueprintPDF = (dimensions: CoverDimensions, specs: Calcula
   const drawDimLine = (x_start: number, y: number, x_end: number, text: string, textAbove = false, extension = false) => {
     // Extension Lines
     if (extension) {
-      doc.setDrawColor(150,150,150);
+      doc.setDrawColor(150, 150, 150);
       doc.setLineDashPattern([1, 1], 0);
       // From bottom of cover to dimension line
       doc.line(tx(x_start), ty(specs.totalHeight), tx(x_start), ty(y));
       doc.line(tx(x_end), ty(specs.totalHeight), tx(x_end), ty(y));
       doc.setLineDashPattern([], 0);
-      doc.setDrawColor(0,0,0);
+      doc.setDrawColor(0, 0, 0);
     }
 
     doc.line(tx(x_start), ty(y), tx(x_end), ty(y));
-    doc.line(tx(x_start), ty(y)-1, tx(x_start), ty(y)+1); 
-    doc.line(tx(x_end), ty(y)-1, tx(x_end), ty(y)+1); 
-    
+    doc.line(tx(x_start), ty(y) - 1, tx(x_start), ty(y) + 1);
+    doc.line(tx(x_end), ty(y) - 1, tx(x_end), ty(y) + 1);
+
     // Text Position
     const textY = textAbove ? ty(y) - 2 : ty(y) + 3;
     doc.text(text, tx((x_start + x_end) / 2), textY, { align: 'center' });
@@ -267,20 +270,20 @@ export const generateBlueprintPDF = (dimensions: CoverDimensions, specs: Calcula
 
   // Vertical Dimension Drawer
   const drawVertDimLine = (x: number, y_start: number, y_end: number, text: string, extension = false, extensionTargetX = 0) => {
-     // Extension Lines
-     if (extension) {
-      doc.setDrawColor(150,150,150);
+    // Extension Lines
+    if (extension) {
+      doc.setDrawColor(150, 150, 150);
       doc.setLineDashPattern([1, 1], 0);
       // From target object X to dimension line X
       doc.line(tx(extensionTargetX), ty(y_start), tx(x), ty(y_start));
       doc.line(tx(extensionTargetX), ty(y_end), tx(x), ty(y_end));
       doc.setLineDashPattern([], 0);
-      doc.setDrawColor(0,0,0);
+      doc.setDrawColor(0, 0, 0);
     }
 
     doc.line(tx(x), ty(y_start), tx(x), ty(y_end));
-    doc.line(tx(x)-1, ty(y_start), tx(x)+1, ty(y_start)); // tick
-    doc.line(tx(x)-1, ty(y_end), tx(x)+1, ty(y_end)); // tick
+    doc.line(tx(x) - 1, ty(y_start), tx(x) + 1, ty(y_start)); // tick
+    doc.line(tx(x) - 1, ty(y_end), tx(x) + 1, ty(y_end)); // tick
 
     // Text Position (Rotated and centered on line)
     const midY = (y_start + y_end) / 2;
@@ -291,15 +294,15 @@ export const generateBlueprintPDF = (dimensions: CoverDimensions, specs: Calcula
   const dimLevel1 = specs.totalHeight + (specs.totalHeight * 0.08);
 
   // Bottom Chain with Text Above + Extensions
-  drawDimLine(0, dimLevel1, turnIn, `${turnIn}`, true, true); 
-  drawDimLine(x1, dimLevel1, x2, `${boardWidth}`, true, true); 
-  
-  drawDimLine(x2, dimLevel1, x3, `${hingeGap}`, true, true); 
-  drawDimLine(x3, dimLevel1, x4, `${spineWidth}`, true, true); 
-  drawDimLine(x4, dimLevel1, x5, `${hingeGap}`, true, true); 
-  
-  drawDimLine(x5, dimLevel1, x6, `${boardWidth}`, true, true); 
-  drawDimLine(x6, dimLevel1, specs.totalWidth, `${turnIn}`, true, true); 
+  drawDimLine(0, dimLevel1, turnIn, `${turnIn}`, true, true);
+  drawDimLine(x1, dimLevel1, x2, `${boardWidth}`, true, true);
+
+  drawDimLine(x2, dimLevel1, x3, `${hingeGap}`, true, true);
+  drawDimLine(x3, dimLevel1, x4, `${spineWidth}`, true, true);
+  drawDimLine(x4, dimLevel1, x5, `${hingeGap}`, true, true);
+
+  drawDimLine(x5, dimLevel1, x6, `${boardWidth}`, true, true);
+  drawDimLine(x6, dimLevel1, specs.totalWidth, `${turnIn}`, true, true);
 
   // Vertical Dimensions - RIGHT SIDE CHAIN
   const rightDimX = specs.totalWidth + (specs.totalWidth * 0.08);
@@ -314,20 +317,21 @@ export const generateBlueprintPDF = (dimensions: CoverDimensions, specs: Calcula
   // Overall Dimensions
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
-  
+
   // Top Total Width (Text Above)
   const topDimY = -specs.totalHeight * 0.08;
   doc.line(tx(0), ty(topDimY), tx(specs.totalWidth), ty(topDimY));
-  doc.line(tx(0), ty(topDimY)-1, tx(0), ty(topDimY)+1);
-  doc.line(tx(specs.totalWidth), ty(topDimY)-1, tx(specs.totalWidth), ty(topDimY)+1);
-  doc.text(`Total Width: ${specs.totalWidth} ${unit}`, tx(specs.totalWidth / 2), ty(topDimY) - 2, {align: 'center'});
+  doc.line(tx(0), ty(topDimY) - 1, tx(0), ty(topDimY) + 1);
+  doc.line(tx(specs.totalWidth), ty(topDimY) - 1, tx(specs.totalWidth), ty(topDimY) + 1);
+  doc.text(`Total Width: ${specs.totalWidth} ${unit}`, tx(specs.totalWidth / 2), ty(topDimY) - 2, { align: 'center' });
 
   // Left Total Height (Text Vertical)
-  const leftDimX = -specs.totalWidth * 0.08;
+  // Use fixed offset instead of percentage to avoid overlapping with sidebar text
+  const leftDimX = -45;
   doc.line(tx(leftDimX), ty(0), tx(leftDimX), ty(specs.totalHeight));
-  doc.line(tx(leftDimX)-1, ty(0), tx(leftDimX)+1, ty(0));
-  doc.line(tx(leftDimX)-1, ty(specs.totalHeight), tx(leftDimX)+1, ty(specs.totalHeight));
-  doc.text(`Total Height: ${specs.totalHeight} ${unit}`, tx(leftDimX) - 2, ty(specs.totalHeight/2), { angle: 90, align: 'center' });
+  doc.line(tx(leftDimX) - 1, ty(0), tx(leftDimX) + 1, ty(0));
+  doc.line(tx(leftDimX) - 1, ty(specs.totalHeight), tx(leftDimX) + 1, ty(specs.totalHeight));
+  doc.text(`Total Height: ${specs.totalHeight} ${unit}`, tx(leftDimX) + 16, ty(specs.totalHeight / 2), { angle: 90, align: 'center' });
 
 
   doc.save("blueprint_spec_sheet.pdf");
